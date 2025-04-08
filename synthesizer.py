@@ -48,7 +48,7 @@ def synthesize_summary():
         combined += AudioSegment.from_mp3(temp_path)
 
     combined.export(OUTPUT_PATH, format="mp3")
-    print(f"\n✅ Final audio saved to {OUTPUT_PATH}")
+    print(f"\nFinal audio saved to {OUTPUT_PATH}")
 
 if __name__ == "__main__":
     synthesize_summary()
