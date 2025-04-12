@@ -1,57 +1,60 @@
-from moviepy.editor import ImageClip, concatenate_videoclips, AudioFileClip
+from moviepy import ImageClip, concatenate_videoclips, AudioFileClip
+from moviepy import vfx
 from PIL import Image, ImageOps
+from PIL.Image import Resampling
+import numpy as np
 import os
 
 # Constants
-IMAGE_DIR = "images"
-AUDIO_FILE = "audio/output-gpt-4.5.mp3"
+IMAGE_DIR = "images/sequence"
+AUDIO_FILE = "audio/output.mp3"
 VIDEO_OUTPUT = "output/video.mp4"
 VIDEO_SIZE = (1920, 1080)
 FADE_DURATION = 1  # seconds
+DURATION_PER_IMAGE = 7  # seconds
 
-# Load audio to get its duration
-audio = AudioFileClip(AUDIO_FILE)
-audio_duration = audio.duration
-
-# Prepare image clips
+# Collect image clips
 image_clips = []
-image_files = sorted(os.listdir(IMAGE_DIR))
-
-# Calculate dynamic duration per image
-num_images = len(image_files)
-if num_images == 0:
-    raise RuntimeError("No images found in the images directory.")
-
-duration_per_image = audio_duration / num_images
-
 width, height = VIDEO_SIZE
 
-for filename in image_files:
+for idx, filename in enumerate(sorted(os.listdir(IMAGE_DIR))):
     filepath = os.path.join(IMAGE_DIR, filename)
     try:
-        img = Image.open(filepath)
+        img = Image.open(filepath).convert("RGB")
         img = ImageOps.exif_transpose(img)
-        img = img.resize((width, height), resample=Image.LANCZOS)
-        img.save(filepath)
+        img = img.resize((width, height), resample=Resampling.LANCZOS)
 
-        clip = ImageClip(filepath).set_duration(duration_per_image)
-        clip = clip.fadein(FADE_DURATION).fadeout(FADE_DURATION)
+        # Convert to NumPy array and pass to ImageClip
+        img_array = np.array(img)
+        clip = ImageClip(img_array)
+        clip = clip.with_duration(DURATION_PER_IMAGE)
+        clip = clip.with_position(lambda t: ("center", int(10 * t)))
+        clip = clip.with_effects([
+            vfx.Resize(lambda t: 1 + 0.05 * t),
+            vfx.FadeIn(FADE_DURATION),
+            vfx.FadeOut(FADE_DURATION),
+        ])
         image_clips.append(clip)
     except Exception as e:
-        print(f"Skipping {filename} due to error: {e}")
+        print(f"⚠️ Skipping {filename} due to error: {e}")
 
-# Final check
+# Final fallback check
 if not image_clips:
-    raise RuntimeError("No valid image clips could be created.")
+    raise RuntimeError("No valid images found to create video.")
 
-# Concatenate image clips into a video
+# Create final video clip
 video = concatenate_videoclips(image_clips, method="compose")
-video = video.set_audio(audio)
+
+# Add background narration
+if os.path.exists(AUDIO_FILE):
+    audio = AudioFileClip(AUDIO_FILE)
+    audio = audio.subclipped(0, video.duration)
+    video = video.with_audio(audio)
 
 # Ensure output directory exists
 os.makedirs(os.path.dirname(VIDEO_OUTPUT), exist_ok=True)
 
-# Write the final video
+# Export video
 video.write_videofile(VIDEO_OUTPUT, fps=24)
 
-print("\nVideo rendering complete! Check:", VIDEO_OUTPUT)
+print("\n🎞️  Video rendering complete! Check:", VIDEO_OUTPUT)
