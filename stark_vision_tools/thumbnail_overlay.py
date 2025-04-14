@@ -4,17 +4,17 @@ import json
 
 # === Settings ===
 FONT_PATH = Path("stark_vision_tools/fonts/Montserrat-SemiBold.ttf")
-FONT_SIZE = 88
-# FONT_SIZE = 72
+# FONT_SIZE = 88
+FONT_SIZE = 72
 
 # Layout mode can be: "stacked" or "split"
 #  - "stacked": line1 directly above line2
 #  - "split": line1 at top, line2 at bottom
 LAYOUT_MODE = "split"
 
-LINE_SPACING = 20
-PADDING = 90
-# PADDING = 40
+LINE_SPACING = 10
+PADDING = 70
+# PADDING = 30
 
 # === Paths ===
 THUMBNAIL_PATH = Path("stark_vision_tools/output/thumbnail.jpg")

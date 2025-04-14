@@ -10,8 +10,8 @@ IMAGE_DIR = "images/sequence"
 AUDIO_FILE = "audio/output.mp3"
 VIDEO_OUTPUT = "output/video.mp4"
 VIDEO_SIZE = (1920, 1080)
-FADE_DURATION = 1  # seconds
-DURATION_PER_IMAGE = 7  # seconds
+FADE_DURATION = 1.5  # seconds
+DURATION_PER_IMAGE = 11 # seconds
 
 # Collect image clips
 image_clips = []
@@ -36,7 +36,7 @@ for idx, filename in enumerate(sorted(os.listdir(IMAGE_DIR))):
         ])
         image_clips.append(clip)
     except Exception as e:
-        print(f"⚠️ Skipping {filename} due to error: {e}")
+        print(f"Skipping {filename} due to error: {e}")
 
 # Final fallback check
 if not image_clips:
@@ -44,6 +44,7 @@ if not image_clips:
 
 # Create final video clip
 video = concatenate_videoclips(image_clips, method="compose")
+# video = concatenate_videoclips(image_clips, method="compose", padding=-FADE_DURATION)
 
 # Add background narration
 if os.path.exists(AUDIO_FILE):
@@ -57,4 +58,4 @@ os.makedirs(os.path.dirname(VIDEO_OUTPUT), exist_ok=True)
 # Export video
 video.write_videofile(VIDEO_OUTPUT, fps=24)
 
-print("\n🎞️  Video rendering complete! Check:", VIDEO_OUTPUT)
+print("\n Video rendering complete! Check:", VIDEO_OUTPUT)

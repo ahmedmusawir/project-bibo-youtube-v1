@@ -27,6 +27,7 @@ def summarize_transcript():
             "Avoid any meta instructions, introductions, or framing language like 'Here is your script'. Output only the clean narration-ready script, and make sure it ends with a complete, conclusive statement. "
             "Your script should be long enough to produce a voiceover between 5 to 6 minutes in length — aim for approximately 900 to 1000 words. "
             "Prioritize completeness and engagement over strict brevity."
+            "Also, the source content might have advertising content mixed in ... plz avoid that..."
         )),
         ("user", "{context}")
     ])

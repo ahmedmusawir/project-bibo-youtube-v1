@@ -41,7 +41,8 @@ def synthesize_summary():
         print(f"\n Synthesizing chunk {i+1}/{len(chunks)}...")
         with client.audio.speech.with_streaming_response.create(
             model="tts-1",
-            voice="onyx",
+            voice="alloy",
+            instructions="Speak in a cheerful and positive tone. Show excitement when necessary",
             input=chunk
         ) as response:
             response.stream_to_file(temp_path)
