@@ -172,4 +172,28 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-output/video.mp4
+
+# MOOSE IGNORE
+output/*
+!output/.gitkeep
+
+# Ignore audio outputs
+audio/*
+!audio/.gitkeep
+
+# Ignore raw audio
+raw/*
+!raw/.gitkeep
+
+# Ignore all output videos
+output/*
+!output/.gitkeep
+
+# Ignore all sequence images (jpg, png)
+images/sequence/*
+!images/sequence/.gitkeep
+
+# (Optional) Ignore text outputs if you want, or keep as is
+text/*
+!text/.gitkeep
+
