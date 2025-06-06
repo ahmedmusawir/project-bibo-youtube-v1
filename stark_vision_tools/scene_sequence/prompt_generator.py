@@ -15,7 +15,7 @@ SUMMARY_PATH = Path("text/summary.txt")
 PROMPT_OUTPUT_PATH = Path("stark_vision_tools/scene_sequence/output/scene_prompts.txt")
 
 # === Model Setup ===
-llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
+llm = ChatOpenAI(model="gpt-4.1")
 
 # === Prompt Template ===
 prompt_template = ChatPromptTemplate.from_messages([

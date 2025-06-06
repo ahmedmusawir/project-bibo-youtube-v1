@@ -12,7 +12,7 @@ load_dotenv()
 
 # === Model Setup ===
 from langchain_openai import ChatOpenAI
-llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
+llm = ChatOpenAI(model="gpt-4.1")
 
 # === File Paths ===
 SUMMARY_PATH = Path("text/summary.txt")

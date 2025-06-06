@@ -30,17 +30,24 @@ def split_text(text, limit):
     return chunks
 
 def synthesize_summary():
+
+    print(f"\nReading the Summary Text ... ")
     text = SUMMARY_PATH.read_text(encoding="utf-8")
+
+    print(f"\nSplitting Text into Chunks ...")
     chunks = split_text(text, CHUNK_LIMIT)
 
     AUDIO_DIR.mkdir(exist_ok=True)
     combined = AudioSegment.empty()
 
+    print(f"\nStarting to Synthesize Chunks ...")
+
     for i, chunk in enumerate(chunks):
         temp_path = AUDIO_DIR / f"chunk_{i+1}.mp3"
         print(f"\n Synthesizing chunk {i+1}/{len(chunks)}...")
         with client.audio.speech.with_streaming_response.create(
-            model="tts-1",
+            model="gpt-4o-mini-tts",
+            # model="tts-1",
             voice="alloy",
             instructions="Speak in a cheerful and positive tone. Show excitement when necessary",
             input=chunk

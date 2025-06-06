@@ -197,3 +197,6 @@ images/sequence/*
 text/*
 !text/.gitkeep
 
+# Google Cloud Service Account Key
+cyberize-vertex-api.json
+

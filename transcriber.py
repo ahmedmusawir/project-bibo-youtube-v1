@@ -5,12 +5,15 @@ from pydub import AudioSegment
 import os
 from dotenv import load_dotenv
 
+# Ask user for the YouTube URL interactively
+youtube_url = input("Enter YouTube URL: ").strip()
+
 # Load API key
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Constants
-youtube_url = "https://youtu.be/2IK3DFHRFfw"
+# youtube_url = "https://youtu.be/xQUPXeYGsYk"
 RAW_DIR = Path("raw")
 TEXT_DIR = Path("text")
 RAW_DIR.mkdir(exist_ok=True)

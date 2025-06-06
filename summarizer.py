@@ -10,7 +10,8 @@ import os
 load_dotenv()
 
 # Setup GPT-4.5 preview model
-llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
+llm = ChatOpenAI(model="gpt-4.1")
+# llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
 
 # File paths
 TRANSCRIPT_PATH = Path("text/transcript.txt")
@@ -32,7 +33,9 @@ def summarize_transcript():
         ("user", "{context}")
     ])
 
+    print(f"✅ Starting Summary Chain ... ")
     chain = create_stuff_documents_chain(llm, prompt)
+    print(f"✅ Starting to Summarize ...")
     result = chain.invoke({"context": docs})
     SUMMARY_PATH.write_text(result, encoding='utf-8')
     print(f"✅ Summary saved to {SUMMARY_PATH}")
