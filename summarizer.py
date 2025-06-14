@@ -10,7 +10,8 @@ import os
 load_dotenv()
 
 # Setup GPT-4.5 preview model
-llm = ChatOpenAI(model="gpt-4.1")
+llm = ChatOpenAI(model="o3")
+# llm = ChatOpenAI(model="gpt-4.1")
 # llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
 
 # File paths
@@ -22,17 +23,34 @@ def summarize_transcript():
     docs = loader.load()
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", (
-            "You are an expert video script editor. Your job is to transform transcripts into engaging, informative, and natural narration scripts for YouTube videos. "
-            "The final script should feel like a mini-documentary or educational storytelling piece, rich in detail and accessible in tone. Make sure the focus in on the information. The target is to give people the most information possible from the source transcript"
-            "Avoid any meta instructions, introductions, or framing language like 'Here is your script'. Output only the clean narration-ready script, and make sure it ends with a complete, conclusive statement. "
-            "Your script should be long enough to produce a voiceover between 5 to 6 minutes in length — aim for approximately 900 words [MUST BE FOLLOWED STRICTLY]. "
-            "Prioritize completeness and engagement over strict brevity."
-            "Also, the source content might have advertising content mixed in ... plz avoid that..."
-            "FOCUS ON THE INFORMATIVE PARTS AND TRY HARD TO KEEP IT WITHIN 5-6 MINUTES WHICH IS ABOUT 900 WORDS. WHY THIS IS IMPORTANT? THIS IS THE WHOLE POINT OF OUR YOUTUBE CHANNEL, WE DELIVER CONTENT IN A SMALL BITE SIZE SO THAT VIEWER CAN LISTEN ON THE GO! NO TIME TO LISTEN TO LONG FROM STUFF..."
-        )),
-        ("user", "{context}")
+        (
+            "system",
+            (
+                "You are an expert YouTube script editor.\n"
+                "Goal: transform raw transcripts into a compelling, documentary-style narration script "
+                "that delivers **maximum information in minimum time**.\n\n"
+                "🔒 HARD CONSTRAINTS (obey 100%):\n"
+                "1. Final script length = 770-920 words (aim ~900). **IF draft > 920 words, TRIM until ≤920.**\n"
+                "2. Remove ads, sponsorship pitches, or meta chatter.\n"
+                "3. No framing language (e.g., ‘Here is your script’).\n"
+                "4. Finish with a conclusive, satisfying statement.\n\n"
+                "📑 STRUCTURE:\n"
+                "- 1-sentence HOOK that sparks curiosity.\n"
+                "- 2-3 short CONTEXT blocks (each ≤120 words) explaining core ideas.\n"
+                "- BULLETED ‘Key Takeaways’ section (3-5 bullets, ≤40 words each).\n"
+                "- 1-sentence CLOSING that ties everything together.\n\n"
+                "🎯 STYLE: concise, vivid, accessible—think ‘mini-doc for busy tech lovers’. "
+                "Sprinkle critical stats or comparisons only when they sharpen understanding.\n"
+                "TARGET VIEWER: on-the-go professionals who value dense, five-minute knowledge bites.\n"
+            )
+        ),
+        (
+            "user",
+            "{context}\n\n"
+            "REMINDER: 770-920 words total. Trim ruthlessly if longer.\n"
+        )
     ])
+
 
     print(f"✅ Starting Summary Chain ... ")
     chain = create_stuff_documents_chain(llm, prompt)

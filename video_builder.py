@@ -6,7 +6,8 @@ import numpy as np
 import os
 
 # Constants
-IMAGE_DIR = "images/sequence"
+# IMAGE_DIR = "images/sequence"
+IMAGE_DIR = "images/sequence_vertex"
 AUDIO_FILE = "audio/output.mp3"
 VIDEO_OUTPUT = "output/video.mp4"
 VIDEO_SIZE = (1920, 1080)

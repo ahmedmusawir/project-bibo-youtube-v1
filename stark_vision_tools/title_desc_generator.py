@@ -12,7 +12,8 @@ import json
 load_dotenv()
 
 # === Model Setup ===
-llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
+llm = ChatOpenAI(model="o3")
+# llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
 
 # === File Paths ===
 SUMMARY_PATH = Path("text/summary.txt")

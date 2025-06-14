@@ -54,17 +54,7 @@ def synthesize_summary():
             voice="ash",
             # voice="nova",
             # voice="shimmer",
-            # --- PASTE THE NEW, DETAILED INSTRUCTIONS HERE ---
-            instructions="""Voice: Confident, dynamic, and charismatic, with a clear and compelling cadence that makes complex topics feel exciting and easy to understand. The voice should have a natural energy that builds anticipation.
-
-            Tone: Enthusiastic, knowledgeable, and forward-looking. It's the voice of someone who is passionate about the subject and genuinely wants the audience to share in the excitement of discovery. Avoids being dry or monotonous at all costs.
-
-            Dialect: Crisp, modern, and professional. The delivery is conversational, like a trusted expert talking directly to an intelligent friend.
-
-            Pronunciation: Flawlessly clear and precise. Key technical terms and brand names are articulated with authority. The pacing is deliberate, using short pauses to emphasize critical points and give the listener a moment to absorb the information.
-
-            Features: Uses a mix of upbeat, declarative statements and engaging, hypothetical questions ("What if you could...?"). The voice should naturally crescendo when revealing key insights and maintain a steady, engaging rhythm during explanations. This is the voice of a top-tier creator at the peak of their game.
-            """,
+            instructions="Speak in a cheerful and positive tone. Show excitement when necessary! Remember, you are the voice of a super engaging and popular YouTube video!!",
             input=chunk
         ) as response:
             response.stream_to_file(temp_path)

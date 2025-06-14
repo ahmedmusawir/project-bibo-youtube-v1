@@ -191,7 +191,9 @@ output/*
 
 # Ignore all sequence images (jpg, png)
 images/sequence/*
+images/sequence_vertex/*
 !images/sequence/.gitkeep
+!images/sequence_vertex/.gitkeep
 
 # (Optional) Ignore text outputs if you want, or keep as is
 text/*
@@ -199,4 +201,7 @@ text/*
 
 # Google Cloud Service Account Key
 cyberize-vertex-api.json
+
+# test images
+GENERATED_IMAGES/*
 

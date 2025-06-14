@@ -14,13 +14,14 @@ load_dotenv()
 # === Primary Configuration ===
 # This is now the main control for your video's pacing.
 # Change this one value to adjust how many images are generated for the video.
-SECONDS_PER_IMAGE = 20 
+SECONDS_PER_IMAGE = 25 
 
 # === Paths and Model Setup ===
 SUMMARY_PATH = Path("text/summary.txt")
 PROMPT_OUTPUT_PATH = Path("stark_vision_tools/scene_sequence/output/scene_prompts.txt")
 AUDIO_FILE_PATH = "audio/output.mp3"
-llm = ChatOpenAI(model="gpt-4.1", temperature=0.8) 
+llm = ChatOpenAI(model="o3", temperature=0.8) 
+# llm = ChatOpenAI(model="gpt-4.1", temperature=0.8) 
 
 # === Prompt Template for Text Chunks ===
 # This template is designed to create one specific prompt from one small piece of text.
