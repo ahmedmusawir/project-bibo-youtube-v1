@@ -48,8 +48,9 @@ def synthesize_summary():
         with client.audio.speech.with_streaming_response.create(
             model="gpt-4o-mini-tts",
             # model="tts-1",
+            # voice="onyx",
             voice="alloy",
-            instructions="Speak in a cheerful and positive tone. Show excitement when necessary",
+            instructions="Speak in a cheerful and positive tone. Show excitement when necessary! Remember, you are the voice of a super engaging and popular YouTube video!!",
             input=chunk
         ) as response:
             response.stream_to_file(temp_path)

@@ -36,7 +36,7 @@ for i, prompt in enumerate(numbered_prompts):
             prompt=prompt_text,
             size="1792x1024",
             style="vivid",
-            quality="hd",
+            quality="standard",
             n=1,
             response_format="url",
         )

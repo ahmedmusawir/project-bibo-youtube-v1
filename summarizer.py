@@ -24,11 +24,12 @@ def summarize_transcript():
     prompt = ChatPromptTemplate.from_messages([
         ("system", (
             "You are an expert video script editor. Your job is to transform transcripts into engaging, informative, and natural narration scripts for YouTube videos. "
-            "The final script should feel like a mini-documentary or educational storytelling piece, rich in detail and accessible in tone. "
+            "The final script should feel like a mini-documentary or educational storytelling piece, rich in detail and accessible in tone. Make sure the focus in on the information. The target is to give people the most information possible from the source transcript"
             "Avoid any meta instructions, introductions, or framing language like 'Here is your script'. Output only the clean narration-ready script, and make sure it ends with a complete, conclusive statement. "
-            "Your script should be long enough to produce a voiceover between 5 to 6 minutes in length — aim for approximately 900 to 1000 words. "
+            "Your script should be long enough to produce a voiceover between 5 to 6 minutes in length — aim for approximately 900 words [MUST BE FOLLOWED STRICTLY]. "
             "Prioritize completeness and engagement over strict brevity."
             "Also, the source content might have advertising content mixed in ... plz avoid that..."
+            "FOCUS ON THE INFORMATIVE PARTS AND TRY HARD TO KEEP IT WITHIN 5-6 MINUTES WHICH IS ABOUT 900 WORDS. WHY THIS IS IMPORTANT? THIS IS THE WHOLE POINT OF OUR YOUTUBE CHANNEL, WE DELIVER CONTENT IN A SMALL BITE SIZE SO THAT VIEWER CAN LISTEN ON THE GO! NO TIME TO LISTEN TO LONG FROM STUFF..."
         )),
         ("user", "{context}")
     ])
