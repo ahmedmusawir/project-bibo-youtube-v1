@@ -5,6 +5,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from langchain_anthropic import ChatAnthropic
 import os
 import math
 
@@ -14,14 +15,23 @@ load_dotenv()
 # === Primary Configuration ===
 # This is now the main control for your video's pacing.
 # Change this one value to adjust how many images are generated for the video.
-SECONDS_PER_IMAGE = 25 
+SECONDS_PER_IMAGE = 20 
 
 # === Paths and Model Setup ===
 SUMMARY_PATH = Path("text/summary.txt")
 PROMPT_OUTPUT_PATH = Path("stark_vision_tools/scene_sequence/output/scene_prompts.txt")
 AUDIO_FILE_PATH = "audio/output.mp3"
-llm = ChatOpenAI(model="o3", temperature=0.8) 
+# llm = ChatOpenAI(model="o1") 
 # llm = ChatOpenAI(model="gpt-4.1", temperature=0.8) 
+llm = ChatAnthropic(
+    model="claude-sonnet-4-20250514",
+    # model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY"),  # Pass the API key here
+    temperature=0.8,
+    # max_tokens=1024,
+    timeout=None,
+    max_retries=3,
+)
 
 # === Prompt Template for Text Chunks ===
 # This template is designed to create one specific prompt from one small piece of text.
@@ -31,7 +41,7 @@ prompt_template = ChatPromptTemplate.from_messages([
         "The prompt should be a cinematic, highly-detailed description of the key idea in the following text chunk. Make sure the most important parts are visible to the audience because these images will be used for video creation\n"
         "Focus on one clear moment. Keep the prompt under 200 words.\n"
         "Output only the prompt itself — no extra text, no numbering, no explanations."
-        "Focus on the information. For example: if it says Claude 4, Gemini 2.5 etc. try to include the words into your prompt and make sure those are reflected on the images."
+        "Focus on the information. For example: if it says Claude 4, Gemini 2.5, ChatGPT, Poe, Perplexity, Apple, OpenAI, Anthropic, Gork, Mistral, Ollama, Meta, or any other brand or industry terms etc. try to include those words into your prompt and make sure those are reflected on the images. This is why, since we are using auto generated images, those words will be used a the visual queues for our viewers while audio is playing. It's always better when the user sees the text written clearly while the words are being said. This anchors the viewer with the audio to the visuals. So this is very important that the images we create reflect what is being said ... if possible, let's push for making visuals as realistic as possible ... like taken images from the real world. Try to make it look like the real thing. For example, when we talk about ChatGPT, try to show screens from ChatGPT with openai logos etc. When Poe is being talked about ... let's show Poe.com logo ... same way anthropic logo etc. so that the viewer can identify with what they know about with what is being said in the audio."
     )),
     ("user", "Text Chunk: \"{text_chunk}\"")
 ])

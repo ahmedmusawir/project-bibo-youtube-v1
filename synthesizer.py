@@ -51,8 +51,7 @@ def synthesize_summary():
             # voice="onyx",
             # voice="alloy",
             # voice="echo",
-            voice="ash",
-            # voice="nova",
+            voice="nova",
             # voice="shimmer",
             # --- PASTE THE NEW, DETAILED INSTRUCTIONS HERE ---
             instructions="""Voice: Confident, dynamic, and charismatic, with a clear and compelling cadence that makes complex topics feel exciting and easy to understand. The voice should have a natural energy that builds anticipation.

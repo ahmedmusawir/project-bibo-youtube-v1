@@ -4,6 +4,8 @@ from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.output_parser import StrOutputParser
+from langchain_anthropic import ChatAnthropic
+
 from dotenv import load_dotenv
 import os
 import json
@@ -12,7 +14,16 @@ import json
 load_dotenv()
 
 # === Model Setup ===
-llm = ChatOpenAI(model="o3")
+llm = ChatAnthropic(
+    model="claude-sonnet-4-20250514",
+    # model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY"),  # Pass the API key here
+    temperature=0.8,
+    # max_tokens=1024,
+    timeout=None,
+    max_retries=3,
+)
+# llm = ChatOpenAI(model="o1")
 # llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
 
 # === File Paths ===
