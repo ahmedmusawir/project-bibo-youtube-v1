@@ -40,8 +40,9 @@ IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 print("Loading Imagen model...")
 # Load your preferred Imagen model once. This is much more efficient than loading it in the loop.
 # "imagen-4.0-generate-preview-06-06" is a great choice for quality.
-# generation_model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-preview-06-06")
-generation_model = ImageGenerationModel.from_pretrained("imagen-4.0-fast-generate-preview-06-06")
+generation_model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-preview-06-06")
+# generation_model = ImageGenerationModel.from_pretrained("imagen-4.0-fast-generate-preview-06-06")
+# generation_model = ImageGenerationModel.from_pretrained("imagen-4.0-ultra-generate-preview-06-06")
 print("✅ Model loaded successfully.")
 
 # --- 4. READ PROMPTS ---
