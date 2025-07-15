@@ -202,6 +202,6 @@ text/*
 # Google Cloud Service Account Key
 cyberize-vertex-api.json
 
-# test images
-GENERATED_IMAGES/*
+# The output folder
+projects/
 
