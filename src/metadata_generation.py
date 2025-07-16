@@ -1,88 +1,115 @@
-# title_desc_generator.py
-
-from pathlib import Path
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema.output_parser import StrOutputParser
-from langchain_anthropic import ChatAnthropic
-
-from dotenv import load_dotenv
 import os
-import json
+from pathlib import Path
+from dotenv import load_dotenv
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_anthropic import ChatAnthropic
+from langchain.schema.output_parser import StrOutputParser
 
-# === Load .env ===
+# Load environment variables
 load_dotenv()
 
-# === Model Setup ===
+# Initialize the language model
 llm = ChatAnthropic(
-    model="claude-sonnet-4-20250514",
-    # model="claude-3-5-sonnet-20240620",
-    api_key=os.getenv("ANTHROPIC_API_KEY"),  # Pass the API key here
+    model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
     temperature=0.8,
-    # max_tokens=1024,
+    max_tokens=1024,
     timeout=None,
     max_retries=3,
 )
-# llm = ChatOpenAI(model="o1")
-# llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
 
-# === File Paths ===
-SUMMARY_PATH = Path("text/summary.txt")
-OUTPUT_DIR = Path("stark_vision_tools/output")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+def parse_metadata_output(raw_text: str) -> dict:
+    """Parses the raw LLM output into a structured dictionary."""
+    metadata = {
+        "titles": [],
+        "description": "",
+        "hashtags": []
+    }
+    mode = None
+    description_lines = []
 
-TITLES_PATH = OUTPUT_DIR / "titles.json"
-DESCRIPTION_PATH = OUTPUT_DIR / "description.txt"
-HASHTAGS_PATH = OUTPUT_DIR / "hashtags.txt"
+    for line in raw_text.splitlines():
+        line_stripped = line.strip()
+        if line_stripped.startswith("TITLES:"):
+            mode = "titles"
+            continue
+        elif line_stripped.startswith("DESCRIPTION:"):
+            mode = "description"
+            # Handle case where description is on the same line
+            if len(line_stripped) > len("DESCRIPTION:"):
+                description_lines.append(line_stripped[len("DESCRIPTION:"):].strip())
+            continue
+        elif line_stripped.startswith("HASHTAGS:"):
+            mode = "hashtags"
+            # Handle case where hashtags are on the same line
+            if len(line_stripped) > len("HASHTAGS:"):
+                metadata["hashtags"].extend(tag for tag in line_stripped[len("HASHTAGS:"):].split() if tag.startswith("#"))
+            continue
 
-# === Prompt Template ===
-prompt = ChatPromptTemplate.from_messages([
-    ("system", (
-        "You are a YouTube content strategist. Based on a summary of a video, generate the following:\n"
-        "1. Five SEO-friendly, clickable YouTube video titles.\n"
-        "2. A YouTube video description that is engaging, informative, and around 100–300 words long.\n"
-        "3. A list of 5 to 10 relevant hashtags starting with #.\n"
-        "Format your response in this structure:\n"
-        "TITLES:\n- ...\n- ...\n\nDESCRIPTION:\n...\n\nHASHTAGS:\n#tag1 #tag2 #tag3 ..."
-    )),
-    ("user", "{context}")
-])
+        if mode == "titles" and line_stripped.startswith("-"):
+            metadata["titles"].append(line_stripped.lstrip("- ").strip())
+        elif mode == "description":
+            description_lines.append(line_stripped)
+        elif mode == "hashtags":
+            metadata["hashtags"].extend(tag for tag in line_stripped.split() if tag.startswith("#"))
+    
+    metadata["description"] = "\n".join(description_lines).strip()
+    return metadata
 
-# === Load Summary ===
-summary_text = SUMMARY_PATH.read_text(encoding="utf-8").strip()
+def generate_metadata(summary_path: str, output_path: str) -> str:
+    """
+    Generates YouTube metadata from a summary and saves it to a single text file.
+    The output format is:
+    - Description
+    - Hashtags
+    - Separator
+    - Titles
 
-# === Run LLM Chain ===
-chain = prompt | llm | StrOutputParser()
-result = chain.invoke({"context": summary_text})
+    Args:
+        summary_path (str): The absolute path to the input summary file.
+        output_path (str): The absolute path to save the output text file.
 
-# === Parse Output ===
-titles = []
-description = ""
-hashtags = []
+    Returns:
+        str: The path to the saved text file.
+    """
+    print(f"-> Loading summary from: {summary_path}")
+    summary_text = Path(summary_path).read_text(encoding="utf-8").strip()
 
-mode = None
-for line in result.splitlines():
-    line = line.strip()
-    if line.startswith("TITLES"):
-        mode = "titles"
-        continue
-    elif line.startswith("DESCRIPTION"):
-        mode = "description"
-        continue
-    elif line.startswith("HASHTAGS"):
-        mode = "hashtags"
-        continue
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", (
+            "You are a YouTube content strategist. Based on a summary of a video, generate the following:\n"
+            "1. Five SEO-friendly, clickable YouTube video titles.\n"
+            "2. A YouTube video description that is engaging, informative, and around 100–300 words long.\n"
+            "3. A list of 5 to 10 relevant hashtags starting with #.\n"
+            "Format your response in this exact structure, with each section header on a new line:\n"
+            "TITLES:\n- Title 1\n- Title 2\n\nDESCRIPTION:\nYour description here.\n\nHASHTAGS:\n#tag1 #tag2 #tag3 ..."
+        )),
+        ("user", "{context}")
+    ])
 
-    if mode == "titles" and line.startswith("-"):
-        titles.append(line.lstrip("- ").strip())
-    elif mode == "description":
-        description += line + "\n"
-    elif mode == "hashtags":
-        hashtags.extend(tag for tag in line.split() if tag.startswith("#"))
+    print("-> Creating metadata generation chain...")
+    chain = prompt | llm | StrOutputParser()
 
-# === Write Output Files ===
-TITLES_PATH.write_text(json.dumps(titles, indent=2), encoding="utf-8")
-DESCRIPTION_PATH.write_text(description.strip(), encoding="utf-8")
-HASHTAGS_PATH.write_text(" ".join(hashtags), encoding="utf-8")
+    print("-> Invoking chain to generate metadata...")
+    raw_result = chain.invoke({"context": summary_text})
 
-print("✅ title_desc_generator.py complete.")
+    print("-> Parsing LLM output...")
+    parsed_metadata = parse_metadata_output(raw_result)
+
+    # Assemble the final text output
+    description = parsed_metadata.get("description", "")
+    hashtags = " ".join(parsed_metadata.get("hashtags", []))
+    titles = "\n".join(parsed_metadata.get("titles", []))
+
+    final_output = f"{description}\n\n{hashtags}\n\n-------------------\n\n{titles}"
+
+    # Ensure the output directory exists
+    output_dir = os.path.dirname(output_path)
+    os.makedirs(output_dir, exist_ok=True)
+
+    print(f"-> Saving consolidated metadata to: {output_path}")
+    Path(output_path).write_text(final_output, encoding="utf-8")
+
+    print(f"✅ Metadata generation complete. Saved to: {output_path}")
+    return output_path
+

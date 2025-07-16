@@ -52,17 +52,18 @@ def compose_video(images_dir: str, audio_path: str, output_path: str, video_size
 
     processed_clips = []
     for clip in image_clips:
-        clip = clip.with_duration(duration_per_image)
-        clip = clip.with_position(('center', 'center'))
-        clip = clip.with_effects([
-            vfx.Resize(lambda t: 1 + 0.05 * t),
-            vfx.FadeIn(fade_duration),
-            vfx.FadeOut(fade_duration),
-        ])
+        clip = clip.set_duration(duration_per_image)
+        # The with_... methods were deprecated in favor of set_...
+        clip = clip.set_position(('center', 'center'))
+        # Ken Burns effect
+        clip = clip.fx(vfx.Resize, lambda t: 1 + 0.05 * t)
+        # Fade transitions
+        clip = clip.fx(vfx.FadeIn, fade_duration)
+        clip = clip.fx(vfx.FadeOut, fade_duration)
         processed_clips.append(clip)
 
     video = concatenate_videoclips(processed_clips, method="compose")
-    video = video.with_audio(audio)
+    video = video.set_audio(audio)
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     print(f"-> Rendering final video to: {output_path} (this may take a while)...")
@@ -70,12 +71,3 @@ def compose_video(images_dir: str, audio_path: str, output_path: str, video_size
 
     print(f"\n✅ Video rendering complete! Check: {output_path}")
     return output_path
-
-if __name__ == "__main__":
-    # This block allows you to run the script directly for a manual test
-    # It uses the assets from our "golden" integration test run
-    images_dir = "projects/integration_test_run/5_images"
-    audio_path = "projects/integration_test_run/2_audio.mp3"
-    output_path = "projects/integration_test_run/6_final_video.mp4"
-    
-    compose_video(images_dir, audio_path, output_path)

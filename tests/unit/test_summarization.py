@@ -1,73 +1,54 @@
 import os
-import shutil
 import pytest
 from unittest.mock import patch, MagicMock
-from pathlib import Path
 
-# Import the function to be tested
 from src.summarization import summarize_transcript
 
-# Define test constants for a temporary directory
-TEST_PROJECT_NAME = "unit_test_summary_project_langchain"
-TEST_PROJECT_PATH = os.path.join("projects", TEST_PROJECT_NAME)
-TEST_TRANSCRIPT_PATH_STR = os.path.join(TEST_PROJECT_PATH, "transcript.txt")
-TEST_SUMMARY_PATH_STR = os.path.join(TEST_PROJECT_PATH, "summary.txt")
-
-# Convert to Path objects for patching, as used in the source
-TEST_TRANSCRIPT_PATH = Path(TEST_TRANSCRIPT_PATH_STR)
-TEST_SUMMARY_PATH = Path(TEST_SUMMARY_PATH_STR)
-
-
-@pytest.fixture
-def setup_teardown_test_files():
-    """Create dummy files and directories for testing and clean up afterward."""
-    # Setup
-    os.makedirs(TEST_PROJECT_PATH, exist_ok=True)
-    with open(TEST_TRANSCRIPT_PATH, "w") as f:
-        f.write("This is a dummy transcript for testing.")
-    
-    yield # This is where the test runs
-
-    # Teardown
-    shutil.rmtree(TEST_PROJECT_PATH)
-
-# We need to patch all external dependencies and file paths within the module
 @patch('src.summarization.create_stuff_documents_chain')
 @patch('src.summarization.TextLoader')
-@patch('src.summarization.ChatAnthropic')
-@patch('src.summarization.TRANSCRIPT_PATH', new=TEST_TRANSCRIPT_PATH)
-@patch('src.summarization.SUMMARY_PATH', new=TEST_SUMMARY_PATH)
-def test_summarize_transcript_with_langchain_mock(
-    mock_chat_anthropic, 
-    mock_text_loader, 
+@patch('src.summarization.ChatAnthropic') # Patch the class to mock the instance
+def test_summarize_transcript_unit(
+    mock_chat_anthropic,
+    mock_text_loader,
     mock_create_chain,
-    setup_teardown_test_files # Use the fixture
+    tmp_path # Use pytest's built-in temporary directory fixture
 ):
     """
-    Tests the summarize_transcript function by mocking the entire LangChain chain.
+    Unit test for summarize_transcript.
+    Mocks the entire LangChain chain to test the function's orchestration.
     """
-    # 1. Setup Mocks
-    # Mock the loader
+    # 1. Setup
+    # Define temporary file paths using the tmp_path fixture
+    temp_transcript_path = tmp_path / "transcript.txt"
+    temp_summary_path = tmp_path / "summary.txt"
+
+    # Create a dummy transcript file
+    temp_transcript_path.write_text("This is a test transcript.")
+
+    # Mock the loader to return dummy documents
     mock_text_loader.return_value.load.return_value = [MagicMock(page_content="dummy content")]
 
-    # Mock the chain and its invocation
+    # Mock the chain and its invocation to return a specific result
     mock_chain_instance = MagicMock()
-    mock_chain_instance.invoke.return_value = "This is the mocked summary from the chain."
+    mock_chain_instance.invoke.return_value = "This is the mocked summary."
     mock_create_chain.return_value = mock_chain_instance
 
     # 2. Execution
-    summarize_transcript()
+    result_path = summarize_transcript(str(temp_transcript_path), str(temp_summary_path))
 
     # 3. Verification
-    # Ensure the loader was called with the correct (patched) path
-    mock_text_loader.assert_called_once_with(str(TEST_TRANSCRIPT_PATH))
+    # Verify that the loader was called with the correct transcript path
+    mock_text_loader.assert_called_once_with(str(temp_transcript_path))
 
-    # Ensure the chain was created and invoked
+    # Verify that the chain was created and invoked
     mock_create_chain.assert_called_once()
     mock_chain_instance.invoke.assert_called_once()
 
-    # Check that the summary file was created with the mocked content
-    assert os.path.exists(TEST_SUMMARY_PATH)
-    with open(TEST_SUMMARY_PATH, "r") as f:
+    # Verify the function returned the correct path
+    assert result_path == str(temp_summary_path)
+
+    # Verify the summary file was created with the mocked content
+    assert os.path.exists(temp_summary_path)
+    with open(temp_summary_path, "r") as f:
         content = f.read()
-    assert content == "This is the mocked summary from the chain."
+    assert content == "This is the mocked summary."

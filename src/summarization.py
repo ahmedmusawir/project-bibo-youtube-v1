@@ -1,37 +1,37 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 from langchain_community.document_loaders import TextLoader
-from langchain_openai import ChatOpenAI
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_anthropic import ChatAnthropic
-
-from dotenv import load_dotenv
-import os
+from langchain.chains.combine_documents import create_stuff_documents_chain
 
 # Load environment variables
 load_dotenv()
 
-# Setup GPT-4.5 preview model
-# llm = ChatOpenAI(model="o1")
-# llm = ChatOpenAI(model="gpt-4.1")
-# llm = ChatOpenAI(model="gpt-4.5-preview-2025-02-27")
-
+# Initialize the language model
 llm = ChatAnthropic(
-    model="claude-sonnet-4-20250514",
-    # model="claude-3-5-sonnet-20240620",
-    api_key=os.getenv("ANTHROPIC_API_KEY"),  # Pass the API key here
+    model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
     temperature=0.8,
-    # max_tokens=1024,
+    max_tokens=4096,
     timeout=None,
     max_retries=3,
 )
 
-# File paths
-TRANSCRIPT_PATH = Path("text/transcript.txt")
-SUMMARY_PATH = Path("text/summary.txt")
+def summarize_transcript(transcript_path: str, summary_path: str) -> str:
+    """
+    Summarizes a transcript from a given file path and saves it to another file path.
 
-def summarize_transcript():
-    loader = TextLoader(str(TRANSCRIPT_PATH))
+    Args:
+        transcript_path (str): The absolute path to the input transcript file.
+        summary_path (str): The absolute path to save the output summary file.
+
+    Returns:
+        str: The path to the saved summary file.
+    """
+    print(f"-> Loading transcript from: {transcript_path}")
+    loader = TextLoader(transcript_path)
     docs = loader.load()
 
     prompt = ChatPromptTemplate.from_messages([
@@ -64,13 +64,17 @@ def summarize_transcript():
         )
     ])
 
-
-    print(f"✅ Starting Summary Chain ... ")
+    print("-> Creating summarization chain...")
     chain = create_stuff_documents_chain(llm, prompt)
-    print(f"✅ Starting to Summarize ...")
+    
+    print("-> Invoking chain to generate summary...")
     result = chain.invoke({"context": docs})
-    SUMMARY_PATH.write_text(result, encoding='utf-8')
-    print(f"✅ Summary saved to {SUMMARY_PATH}")
+    
+    # Ensure the output directory exists
+    output_dir = os.path.dirname(summary_path)
+    os.makedirs(output_dir, exist_ok=True)
 
-if __name__ == "__main__":
-    summarize_transcript()
+    Path(summary_path).write_text(result, encoding='utf-8')
+    print(f"✅ Summary saved to {summary_path}")
+    
+    return summary_path
