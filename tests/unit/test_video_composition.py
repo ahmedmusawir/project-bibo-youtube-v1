@@ -68,7 +68,7 @@ class TestVideoComposition:
 
         # Mock final video concatenation
         mock_final_video = MagicMock()
-        mock_final_video.set_audio.return_value = mock_final_video
+        mock_final_video.with_audio.return_value = mock_final_video
         mock_concatenate.return_value = mock_final_video
 
         # 3. Execute the function
@@ -89,8 +89,8 @@ class TestVideoComposition:
         # Check clips were concatenated
         mock_concatenate.assert_called_once()
         
-        # Check audio was set on final video
-        mock_final_video.set_audio.assert_called_once_with(mock_audio)
+        # Check audio was set on final video (MoviePy 2.x uses with_audio)
+        mock_final_video.with_audio.assert_called_once_with(mock_audio)
         
         # Check video was written with correct parameters
         mock_final_video.write_videofile.assert_called_once_with(str(temp_output_path), fps=24)

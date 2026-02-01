@@ -18,8 +18,9 @@ def handle_youtube_url(project_path):
     """Handles the YouTube URL transcription workflow."""
     youtube_url = input("Enter the YouTube URL to transcribe: ").strip()
     if youtube_url:
-        # We will call the summarizer from here later
-        transcript_path = transcription.transcribe_youtube_audio(youtube_url, project_path)
+        # Build the transcript file path inside the project directory
+        transcript_file_path = os.path.join(project_path, "0_transcript.txt")
+        transcript_path = transcription.transcribe_youtube_audio(youtube_url, transcript_file_path)
         print(f"\nNext step would be to summarize the file at: {transcript_path}")
     else:
         print("URL cannot be empty.")

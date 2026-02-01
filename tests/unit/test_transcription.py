@@ -47,6 +47,26 @@ def test_transcribe_youtube_audio_unit(
 
     # Check that the output file was created with the correct content
     assert os.path.exists(test_output_path)
+    assert os.path.isfile(test_output_path), "Output path must be a file, not a directory"
     with open(test_output_path, "r") as f:
         content = f.read()
     assert content == mock_transcript_text
+
+
+@patch('src.transcription.client')
+@patch('src.transcription._download_audio_to_temp')
+def test_transcribe_rejects_directory_path(mock_downloader, mock_openai_client, tmp_path):
+    """
+    Regression test: transcribe_youtube_audio must receive a file path, not a directory.
+    If given a directory, it should fail (IsADirectoryError).
+    """
+    # Setup: tmp_path is a directory
+    dummy_audio_path = tmp_path / "dummy_audio.mp3"
+    with open(dummy_audio_path, "w") as f:
+        f.write("dummy audio")
+    mock_downloader.return_value = str(dummy_audio_path)
+    mock_openai_client.audio.transcriptions.create.return_value = "transcript"
+
+    # Passing a directory instead of a file path should raise IsADirectoryError
+    with pytest.raises(IsADirectoryError):
+        transcribe_youtube_audio(TEST_YOUTUBE_URL, str(tmp_path))
