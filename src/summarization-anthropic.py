@@ -3,18 +3,20 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_community.document_loaders import TextLoader
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 # Load environment variables
 load_dotenv()
 
 # Initialize the language model
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3-flash-preview",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+llm = ChatAnthropic(
+    model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
     temperature=0.8,
-    max_output_tokens=4096,
+    max_tokens=4096,
+    timeout=None,
+    max_retries=3,
 )
 
 def summarize_transcript(transcript_path: str, summary_path: str) -> str:

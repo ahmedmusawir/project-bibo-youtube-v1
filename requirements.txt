@@ -89,3 +89,5 @@ virtualenv==20.31.2
 websockets==15.0.1
 yt-dlp==2025.6.30
 zstandard==0.23.0
+google-cloud-texttospeech
+google-cloud-speech

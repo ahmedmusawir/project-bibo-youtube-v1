@@ -1,21 +1,20 @@
 import os
+import json
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.schema.output_parser import StrOutputParser
 
 # Load environment variables
 load_dotenv()
 
 # Initialize the language model
-llm = ChatAnthropic(
-    model="claude-3-5-sonnet-20240620",
-    api_key=os.getenv("ANTHROPIC_API_KEY"),
+llm = ChatGoogleGenerativeAI(
+    model="gemini-3-flash-preview",
+    google_api_key=os.getenv("GOOGLE_API_KEY"),
     temperature=0.8,
-    max_tokens=1024,
-    timeout=None,
-    max_retries=3,
+    max_output_tokens=1024,
 )
 
 def parse_metadata_output(raw_text: str) -> dict:
@@ -58,19 +57,14 @@ def parse_metadata_output(raw_text: str) -> dict:
 
 def generate_metadata(summary_path: str, output_path: str) -> str:
     """
-    Generates YouTube metadata from a summary and saves it to a single text file.
-    The output format is:
-    - Description
-    - Hashtags
-    - Separator
-    - Titles
+    Generates YouTube metadata from a summary and saves it to a JSON file.
 
     Args:
         summary_path (str): The absolute path to the input summary file.
-        output_path (str): The absolute path to save the output text file.
+        output_path (str): The absolute path to save the output JSON file.
 
     Returns:
-        str: The path to the saved text file.
+        str: The path to the saved JSON file.
     """
     print(f"-> Loading summary from: {summary_path}")
     summary_text = Path(summary_path).read_text(encoding="utf-8").strip()
@@ -96,19 +90,13 @@ def generate_metadata(summary_path: str, output_path: str) -> str:
     print("-> Parsing LLM output...")
     parsed_metadata = parse_metadata_output(raw_result)
 
-    # Assemble the final text output
-    description = parsed_metadata.get("description", "")
-    hashtags = " ".join(parsed_metadata.get("hashtags", []))
-    titles = "\n".join(parsed_metadata.get("titles", []))
-
-    final_output = f"{description}\n\n{hashtags}\n\n-------------------\n\n{titles}"
-
     # Ensure the output directory exists
     output_dir = os.path.dirname(output_path)
     os.makedirs(output_dir, exist_ok=True)
 
-    print(f"-> Saving consolidated metadata to: {output_path}")
-    Path(output_path).write_text(final_output, encoding="utf-8")
+    print(f"-> Saving metadata as JSON to: {output_path}")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(parsed_metadata, f, indent=2, ensure_ascii=False)
 
     print(f"✅ Metadata generation complete. Saved to: {output_path}")
     return output_path

@@ -3,7 +3,7 @@ import math
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_anthropic import ChatAnthropic
 from langchain.schema.output_parser import StrOutputParser
 from pydub import AudioSegment
 
@@ -16,11 +16,13 @@ load_dotenv()
 SECONDS_PER_IMAGE = 20
 
 # Initialize the language model
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3-flash-preview",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+llm = ChatAnthropic(
+    model="claude-3-5-sonnet-20240620",
+    api_key=os.getenv("ANTHROPIC_API_KEY"),
     temperature=0.8,
-    max_output_tokens=1024,
+    max_tokens=1024,
+    timeout=None,
+    max_retries=3,
 )
 
 def _calculate_num_images(audio_path: str, seconds_per_image: int) -> int:
