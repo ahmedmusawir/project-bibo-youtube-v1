@@ -53,6 +53,7 @@ def summarize_transcript(transcript_path: str, summary_path: str) -> str:
                 "Sprinkle critical stats or comparisons only when they sharpen understanding.\n"
                 "TARGET VIEWER: on-the-go professionals who value dense, five-minute knowledge bites.\n"
                 "Present clean text because this will be converted into voice audio ... so no [context block 1 ... 2 etc.] or anything like that. add nothing in the text other than the content summary ... no extra instructions at all! "
+                "IMPORTANT: This is a youtube script, so you MUST finish with 'Thanks for watching!'"
             )
         ),
         (

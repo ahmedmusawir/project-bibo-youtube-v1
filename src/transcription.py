@@ -119,21 +119,14 @@ def transcribe_youtube_audio(youtube_url: str, output_transcript_path: str):
     print("-> Converting audio to FLAC...")
     flac_path = _convert_to_flac(temp_audio_path)
     
-    # 3. Check file size and decide whether to use inline or GCS
+    # 3. Upload to GCS for long-running recognition
+    # Note: long_running_recognize has a ~1 minute duration limit for inline audio,
+    # so we always use GCS for YouTube videos (which are typically longer)
     file_size = os.path.getsize(flac_path)
-    use_gcs = file_size > MAX_INLINE_AUDIO_SIZE
-    gcs_blob = None
-    
-    if use_gcs:
-        print(f"   - Audio file is {file_size / 1024 / 1024:.1f}MB (>10MB limit)")
-        print("   - Uploading to Google Cloud Storage...")
-        gcs_uri, gcs_blob = _upload_to_gcs(flac_path)
-        audio = speech.RecognitionAudio(uri=gcs_uri)
-    else:
-        print(f"   - Audio file is {file_size / 1024 / 1024:.1f}MB (<10MB, using inline)")
-        with open(flac_path, "rb") as audio_file:
-            audio_content = audio_file.read()
-        audio = speech.RecognitionAudio(content=audio_content)
+    print(f"   - Audio file is {file_size / 1024 / 1024:.1f}MB")
+    print("   - Uploading to Google Cloud Storage for long-running recognition...")
+    gcs_uri, gcs_blob = _upload_to_gcs(flac_path)
+    audio = speech.RecognitionAudio(uri=gcs_uri)
     
     # 4. Configure recognition request
     print(f"-> Transcribing audio with Google Cloud Speech-to-Text ({language_code})...")
